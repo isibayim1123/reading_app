@@ -1,8 +1,12 @@
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { queryClient } from '@/lib/queryClient';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { LoginPage } from '@/pages/LoginPage';
+import { SignupPage } from '@/pages/SignupPage';
+import { DashboardPage } from '@/pages/DashboardPage';
 
 const theme = createTheme({
   palette: {
@@ -21,13 +25,39 @@ function App() {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <BrowserRouter>
-          <div style={{ padding: '2rem', textAlign: 'center' }}>
-            <h1>Reading App</h1>
-            <p>英文音読評価アプリケーション</p>
-            <p style={{ marginTop: '2rem', color: '#666' }}>
-              プロジェクトセットアップが完了しました！
-            </p>
-          </div>
+          <Routes>
+            {/* Public routes */}
+            <Route
+              path="/login"
+              element={
+                <ProtectedRoute requireAuth={false}>
+                  <LoginPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/signup"
+              element={
+                <ProtectedRoute requireAuth={false}>
+                  <SignupPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Protected routes */}
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <DashboardPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Default redirect */}
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
         </BrowserRouter>
       </ThemeProvider>
       <ReactQueryDevtools initialIsOpen={false} />
