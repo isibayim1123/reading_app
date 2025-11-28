@@ -1,56 +1,29 @@
-import { useNavigate } from 'react-router-dom';
 import {
   Container,
   Box,
   Typography,
-  Button,
   Paper,
   Grid,
   Avatar,
 } from '@mui/material';
 import {
-  Logout as LogoutIcon,
   School as SchoolIcon,
   Person as PersonIcon,
 } from '@mui/icons-material';
 import { useAuth } from '@/hooks/useAuth';
+import { Layout } from '@/components/Layout';
 
 export const DashboardPage = () => {
-  const { user, signOut } = useAuth();
-  const navigate = useNavigate();
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      navigate('/login');
-    } catch (error) {
-      console.error('Sign out error:', error);
-    }
-  };
+  const { user } = useAuth();
 
   return (
-    <Container maxWidth="lg">
-      <Box sx={{ mt: 4, mb: 4 }}>
-        {/* Header */}
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            mb: 4,
-          }}
-        >
-          <Typography variant="h4" component="h1">
+    <Layout>
+      <Container maxWidth="lg">
+        <Box sx={{ mt: 4, mb: 4 }}>
+          {/* Header */}
+          <Typography variant="h4" component="h1" gutterBottom>
             ダッシュボード
           </Typography>
-          <Button
-            variant="outlined"
-            startIcon={<LogoutIcon />}
-            onClick={handleSignOut}
-          >
-            ログアウト
-          </Button>
-        </Box>
 
         {/* User Info */}
         <Paper elevation={2} sx={{ p: 3, mb: 4 }}>
@@ -109,19 +82,20 @@ export const DashboardPage = () => {
           </Grid>
         </Grid>
 
-        {/* Welcome Message */}
-        <Paper elevation={2} sx={{ p: 3, mt: 4 }}>
-          <Typography variant="h6" gutterBottom>
-            ようこそ、Reading Appへ！
-          </Typography>
-          <Typography variant="body1" paragraph>
-            英文音読練習を始めましょう。お手本を聞いて、自分で音読してみましょう。
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            ※ 現在、基本機能を開発中です。もうしばらくお待ちください。
-          </Typography>
-        </Paper>
-      </Box>
-    </Container>
+          {/* Welcome Message */}
+          <Paper elevation={2} sx={{ p: 3, mt: 4 }}>
+            <Typography variant="h6" gutterBottom>
+              ようこそ、Reading Appへ！
+            </Typography>
+            <Typography variant="body1" paragraph>
+              英文音読練習を始めましょう。お手本を聞いて、自分で音読してみましょう。
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              ※ 現在、基本機能を開発中です。もうしばらくお待ちください。
+            </Typography>
+          </Paper>
+        </Box>
+      </Container>
+    </Layout>
   );
 };
