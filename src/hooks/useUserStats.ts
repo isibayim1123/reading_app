@@ -37,11 +37,11 @@ export const useUserStats = (userId?: string) => {
     const totalPractices = records.length;
 
     // Average score
-    const totalScore = records.reduce((sum, record) => sum + record.accuracy_score, 0);
+    const totalScore = records.reduce((sum, record) => sum + (record.accuracy_score ?? 0), 0);
     const averageScore = Math.round(totalScore / totalPractices);
 
     // Highest score
-    const highestScore = Math.max(...records.map((r) => r.accuracy_score));
+    const highestScore = Math.max(...records.map((r) => r.accuracy_score ?? 0));
 
     // This week's practices
     const now = new Date();
@@ -57,7 +57,9 @@ export const useUserStats = (userId?: string) => {
     // Grade distribution
     const gradeDistribution = records.reduce(
       (acc, record) => {
-        acc[record.grade]++;
+        if (record.grade) {
+          acc[record.grade]++;
+        }
         return acc;
       },
       { A: 0, B: 0, C: 0, D: 0 } as { A: number; B: number; C: number; D: number }
@@ -66,7 +68,7 @@ export const useUserStats = (userId?: string) => {
     // Recent scores (last 10 practices)
     const recentScores = records
       .slice(0, 10)
-      .map((r) => r.accuracy_score)
+      .map((r) => r.accuracy_score ?? 0)
       .reverse();
 
     return {

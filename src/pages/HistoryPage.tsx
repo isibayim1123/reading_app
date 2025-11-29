@@ -214,14 +214,15 @@ export const HistoryPage = () => {
                   {/* Score and Grade */}
                   <Box sx={{ textAlign: 'center', py: 2 }}>
                     <Typography variant="h2" color="primary" gutterBottom>
-                      {selectedRecord.accuracy_score}
+                      {selectedRecord.accuracy_score ?? 0}
                     </Typography>
-                    <Chip
-                      label={`グレード: ${selectedRecord.grade}`}
-                      color={GRADE_COLORS[selectedRecord.grade]}
-                      size="large"
-                      sx={{ fontSize: '1rem', py: 2 }}
-                    />
+                    {selectedRecord.grade && (
+                      <Chip
+                        label={`グレード: ${selectedRecord.grade}`}
+                        color={GRADE_COLORS[selectedRecord.grade]}
+                        sx={{ fontSize: '1rem', py: 2 }}
+                      />
+                    )}
                   </Box>
 
                   <Divider sx={{ my: 2 }} />

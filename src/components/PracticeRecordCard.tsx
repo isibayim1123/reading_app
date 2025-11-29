@@ -54,13 +54,15 @@ export const PracticeRecordCard = ({ record, onClick }: PracticeRecordCardProps)
           {/* Score and Grade */}
           <Box sx={{ display: 'flex', gap: 1, mb: 2, alignItems: 'center' }}>
             <Typography variant="h4" color="primary">
-              {record.accuracy_score}
+              {record.accuracy_score ?? 0}
             </Typography>
-            <Chip
-              label={GRADE_LABELS[record.grade]}
-              color={GRADE_COLORS[record.grade]}
-              size="small"
-            />
+            {record.grade && (
+              <Chip
+                label={GRADE_LABELS[record.grade]}
+                color={GRADE_COLORS[record.grade]}
+                size="small"
+              />
+            )}
           </Box>
 
           {/* Metadata */}

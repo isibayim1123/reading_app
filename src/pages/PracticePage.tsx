@@ -18,7 +18,6 @@ import {
 import {
   Mic as MicIcon,
   Stop as StopIcon,
-  PlayArrow as PlayIcon,
   Home as HomeIcon,
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
@@ -60,7 +59,6 @@ export const PracticePage = () => {
   } = useAudioRecorder();
 
   const {
-    isListening,
     transcript,
     error: speechError,
     isSupported,
@@ -287,7 +285,6 @@ export const PracticePage = () => {
                   <Chip
                     label={GRADE_LABELS[evaluation.grade]}
                     color={GRADE_COLORS[evaluation.grade]}
-                    size="large"
                     sx={{ fontSize: '1rem', py: 2 }}
                   />
                 </Box>
