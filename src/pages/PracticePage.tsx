@@ -13,6 +13,7 @@ import {
   Card,
   CardContent,
   LinearProgress,
+  Snackbar,
 } from '@mui/material';
 import {
   Mic as MicIcon,
@@ -26,6 +27,8 @@ import { useContent } from '@/hooks/useContents';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
 import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
 import { evaluatePronunciation } from '@/utils/evaluatePronunciation';
+import { useAuth } from '@/hooks/useAuth';
+import { useSavePracticeRecord } from '@/hooks/usePracticeRecords';
 
 const GRADE_COLORS = {
   A: 'success',
@@ -44,7 +47,9 @@ const GRADE_LABELS = {
 export const PracticePage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { data: content, isLoading, error } = useContent(id!);
+  const savePracticeRecord = useSavePracticeRecord();
 
   const {
     isRecording,
@@ -67,12 +72,15 @@ export const PracticePage = () => {
   const [evaluation, setEvaluation] = useState<ReturnType<
     typeof evaluatePronunciation
   > | null>(null);
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+  const [recordingStartTime, setRecordingStartTime] = useState<number | null>(null);
 
   const handleStartPractice = async () => {
     try {
       clearRecording();
       resetTranscript();
       setEvaluation(null);
+      setRecordingStartTime(Date.now());
 
       await startRecording();
       startListening();
@@ -85,11 +93,32 @@ export const PracticePage = () => {
     stopRecording();
     stopListening();
 
+    const duration = recordingStartTime
+      ? Math.floor((Date.now() - recordingStartTime) / 1000)
+      : undefined;
+
     // Evaluate after a short delay to ensure transcript is updated
-    setTimeout(() => {
-      if (content && transcript) {
+    setTimeout(async () => {
+      if (content && transcript && user) {
         const result = evaluatePronunciation(content.text, transcript);
         setEvaluation(result);
+
+        // Save practice record automatically
+        try {
+          await savePracticeRecord.mutateAsync({
+            userId: user.id,
+            contentId: content.id,
+            transcription: result.transcription,
+            wordAccuracy: result.wordAccuracy,
+            accuracyScore: result.accuracyScore,
+            grade: result.grade,
+            feedback: result.feedback,
+            duration,
+          });
+          setShowSaveSuccess(true);
+        } catch (error) {
+          console.error('Failed to save practice record:', error);
+        }
       }
     }, 500);
   };
@@ -347,6 +376,15 @@ export const PracticePage = () => {
             50% { opacity: 0.5; }
           }
         `}</style>
+
+        {/* Success Snackbar */}
+        <Snackbar
+          open={showSaveSuccess}
+          autoHideDuration={4000}
+          onClose={() => setShowSaveSuccess(false)}
+          message="練習記録を保存しました！"
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        />
       </Container>
     </Layout>
   );
