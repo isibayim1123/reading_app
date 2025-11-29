@@ -9,6 +9,7 @@ import { SignupPage } from '@/pages/SignupPage';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { ContentsPage } from '@/pages/ContentsPage';
 import { PracticePage } from '@/pages/PracticePage';
+import { HistoryPage } from '@/pages/HistoryPage';
 
 const theme = createTheme({
   palette: {
@@ -68,6 +69,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <PracticePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/history"
+              element={
+                <ProtectedRoute>
+                  <HistoryPage />
                 </ProtectedRoute>
               }
             />

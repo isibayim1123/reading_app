@@ -14,6 +14,7 @@ import {
   Home as HomeIcon,
   MenuBook as BookIcon,
   AccountCircle as AccountIcon,
+  History as HistoryIcon,
 } from '@mui/icons-material';
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
@@ -67,6 +68,13 @@ export const Navbar = () => {
             onClick={() => navigate('/contents')}
           >
             コンテンツ
+          </Button>
+          <Button
+            color="inherit"
+            startIcon={<HistoryIcon />}
+            onClick={() => navigate('/history')}
+          >
+            学習履歴
           </Button>
         </Box>
 

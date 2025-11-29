@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { PracticeRecord, WordAccuracy, Feedback, Grade } from '@/types/database';
 
@@ -47,8 +47,9 @@ export const useSavePracticeRecord = () => {
 };
 
 export const usePracticeRecords = (userId?: string) => {
-  return useMutation({
-    mutationFn: async () => {
+  return useQuery({
+    queryKey: ['practice-records', userId],
+    queryFn: async () => {
       let query = supabase
         .from('practice_records')
         .select('*, contents(*)')
@@ -62,7 +63,8 @@ export const usePracticeRecords = (userId?: string) => {
 
       if (error) throw error;
 
-      return data;
+      return data as Array<PracticeRecord & { contents: any }>;
     },
+    enabled: !!userId,
   });
 };
