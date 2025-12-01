@@ -97,6 +97,12 @@ export const PracticePage = () => {
 
     // Evaluate after a short delay to ensure transcript is updated
     setTimeout(async () => {
+      console.log('=== 音声認識結果 ===');
+      console.log('元の英文:', content?.text);
+      console.log('認識されたテキスト:', transcript);
+      console.log('文字数:', transcript?.length);
+      console.log('==================');
+
       if (content && transcript && transcript.trim() && user) {
         const result = evaluatePronunciation(content.text, transcript);
         setEvaluation(result);
@@ -120,7 +126,7 @@ export const PracticePage = () => {
       } else if (!transcript || !transcript.trim()) {
         alert('音声が認識されませんでした。もう一度お試しください。');
       }
-    }, 1000);
+    }, 1500); // 認識完了を待つため1.5秒に延長
   };
 
   const handleRetry = () => {
@@ -250,6 +256,29 @@ export const PracticePage = () => {
                   録音中...
                 </Typography>
                 <LinearProgress sx={{ my: 2 }} />
+
+                {/* リアルタイム認識結果表示 */}
+                {transcript && (
+                  <Paper
+                    elevation={1}
+                    sx={{
+                      p: 2,
+                      mb: 2,
+                      bgcolor: 'grey.100',
+                      maxHeight: '120px',
+                      overflowY: 'auto',
+                      textAlign: 'left'
+                    }}
+                  >
+                    <Typography variant="caption" color="text.secondary" display="block" gutterBottom>
+                      認識中のテキスト:
+                    </Typography>
+                    <Typography variant="body2" color="text.primary">
+                      {transcript}
+                    </Typography>
+                  </Paper>
+                )}
+
                 <Button
                   variant="contained"
                   color="error"
