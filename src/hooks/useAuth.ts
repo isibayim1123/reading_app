@@ -1,12 +1,23 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { supabase } from '@/lib/supabase';
 import { Profile } from '@/types/database';
 
+// Global flag to ensure auth initialization runs only once
+let authInitialized = false;
+
 export const useAuth = () => {
   const { user, isLoading, setUser, setLoading, clearUser } = useAuthStore();
+  const initRef = useRef(false);
 
   useEffect(() => {
+    // Prevent multiple initializations
+    if (authInitialized || initRef.current) {
+      return;
+    }
+
+    initRef.current = true;
+    authInitialized = true;
     // Get initial session
     const initializeAuth = async () => {
       try {
@@ -92,6 +103,7 @@ export const useAuth = () => {
 
     return () => {
       subscription.unsubscribe();
+      // Don't reset authInitialized flag on cleanup to prevent re-initialization
     };
     // Zustand store functions are stable and don't need to be in dependencies
     // eslint-disable-next-line react-hooks/exhaustive-deps
