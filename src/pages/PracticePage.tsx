@@ -97,7 +97,7 @@ export const PracticePage = () => {
 
     // Evaluate after a short delay to ensure transcript is updated
     setTimeout(async () => {
-      if (content && transcript && user) {
+      if (content && transcript && transcript.trim() && user) {
         const result = evaluatePronunciation(content.text, transcript);
         setEvaluation(result);
 
@@ -117,8 +117,10 @@ export const PracticePage = () => {
         } catch (error) {
           console.error('Failed to save practice record:', error);
         }
+      } else if (!transcript || !transcript.trim()) {
+        alert('音声が認識されませんでした。もう一度お試しください。');
       }
-    }, 500);
+    }, 1000);
   };
 
   const handleRetry = () => {

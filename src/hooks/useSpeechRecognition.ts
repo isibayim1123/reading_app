@@ -71,6 +71,7 @@ export const useSpeechRecognition = () => {
       } catch (error) {
         // Ignore errors
       }
+      recognitionRef.current = null;
     }
 
     try {
@@ -98,10 +99,12 @@ export const useSpeechRecognition = () => {
         console.error('Speech recognition error:', event.error);
         setError(`音声認識エラー: ${event.error}`);
         setIsListening(false);
+        recognitionRef.current = null;
       };
 
       recognition.onend = () => {
         setIsListening(false);
+        recognitionRef.current = null;
       };
 
       recognitionRef.current = recognition;
@@ -111,13 +114,19 @@ export const useSpeechRecognition = () => {
     } catch (err) {
       console.error('Error starting speech recognition:', err);
       setError('音声認識の開始に失敗しました。');
+      recognitionRef.current = null;
     }
   }, [isSupported]);
 
   const stopListening = useCallback(() => {
     if (recognitionRef.current) {
-      recognitionRef.current.stop();
+      try {
+        recognitionRef.current.stop();
+      } catch (error) {
+        console.error('Error stopping recognition:', error);
+      }
       setIsListening(false);
+      // Don't set to null here - let onend handler do it
     }
   }, []);
 
