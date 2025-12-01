@@ -25,6 +25,7 @@ export const useAuth = () => {
           if (profile) {
             setUser(profile as Profile);
           }
+          setLoading(false);
         } else {
           setLoading(false);
         }
@@ -51,6 +52,7 @@ export const useAuth = () => {
         if (profile) {
           setUser(profile as Profile);
         }
+        setLoading(false);
       } else if (event === 'SIGNED_OUT') {
         clearUser();
       }
