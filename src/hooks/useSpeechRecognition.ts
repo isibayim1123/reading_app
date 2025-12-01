@@ -53,6 +53,7 @@ export const useSpeechRecognition = () => {
   const [transcript, setTranscript] = useState('');
   const [error, setError] = useState<string | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const finalTranscriptRef = useRef('');
 
   const isSupported = useCallback(() => {
     return 'SpeechRecognition' in window || 'webkitSpeechRecognition' in window;
@@ -74,6 +75,9 @@ export const useSpeechRecognition = () => {
       recognitionRef.current = null;
     }
 
+    // Reset final transcript
+    finalTranscriptRef.current = '';
+
     try {
       const SpeechRecognitionAPI =
         window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -84,15 +88,25 @@ export const useSpeechRecognition = () => {
       recognition.lang = 'en-US';
 
       recognition.onresult = (event: SpeechRecognitionEvent) => {
-        // 全ての認識結果を結合する
-        let fullTranscript = '';
-        for (let i = 0; i < event.results.length; i++) {
+        // 確定した結果と暫定結果を分けて処理
+        let interimTranscript = '';
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
           const result = event.results[i];
           if (result && result[0]) {
-            fullTranscript += result[0].transcript + ' ';
+            if (result.isFinal) {
+              // 確定した結果は累積
+              finalTranscriptRef.current += result[0].transcript + ' ';
+            } else {
+              // 暫定結果は表示用
+              interimTranscript += result[0].transcript + ' ';
+            }
           }
         }
-        setTranscript(fullTranscript.trim());
+
+        // 確定部分 + 暫定部分を表示
+        const fullTranscript = (finalTranscriptRef.current + interimTranscript).trim();
+        setTranscript(fullTranscript);
       };
 
       recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
@@ -133,6 +147,7 @@ export const useSpeechRecognition = () => {
   const resetTranscript = useCallback(() => {
     setTranscript('');
     setError(null);
+    finalTranscriptRef.current = '';
   }, []);
 
   // Cleanup on unmount
