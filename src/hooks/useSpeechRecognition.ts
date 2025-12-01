@@ -78,15 +78,20 @@ export const useSpeechRecognition = () => {
         window.SpeechRecognition || window.webkitSpeechRecognition;
       const recognition = new SpeechRecognitionAPI();
 
-      recognition.continuous = false;
-      recognition.interimResults = false;
+      recognition.continuous = true; // 録音中はずっと認識を続ける
+      recognition.interimResults = true; // 途中結果も取得
       recognition.lang = 'en-US';
 
       recognition.onresult = (event: SpeechRecognitionEvent) => {
-        const result = event.results[0];
-        if (result && result[0]) {
-          setTranscript(result[0].transcript);
+        // 全ての認識結果を結合する
+        let fullTranscript = '';
+        for (let i = 0; i < event.results.length; i++) {
+          const result = event.results[i];
+          if (result && result[0]) {
+            fullTranscript += result[0].transcript + ' ';
+          }
         }
+        setTranscript(fullTranscript.trim());
       };
 
       recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
