@@ -14,47 +14,16 @@ export const useAuth = () => {
     }
 
     initRef.current = true;
-    // Get initial session
-    const initializeAuth = async () => {
-      try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-
-        if (session?.user) {
-          // Fetch user profile
-          const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
-
-          if (profileError) {
-            console.error('Error fetching profile on init:', profileError);
-          }
-
-          if (profile) {
-            setUser(profile as Profile);
-          } else {
-            console.warn('User session exists but no profile found');
-          }
-        }
-        setLoading(false);
-      } catch (error) {
-        console.error('Error initializing auth:', error);
-        setLoading(false);
-      }
-    };
-
-    initializeAuth();
 
     // Listen for auth changes
+    // onAuthStateChange automatically fires INITIAL_SESSION event on mount
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state changed:', event);
 
-      if (event === 'SIGNED_IN' && session?.user) {
+      // Handle INITIAL_SESSION and SIGNED_IN the same way
+      if ((event === 'INITIAL_SESSION' || event === 'SIGNED_IN') && session?.user) {
         try {
           // Fetch user profile
           const { data: profile, error } = await supabase
@@ -69,16 +38,22 @@ export const useAuth = () => {
 
           if (profile) {
             setUser(profile as Profile);
+          } else {
+            console.warn('User session exists but no profile found');
           }
         } catch (error) {
           console.error('Error in auth state change:', error);
         } finally {
           setLoading(false);
         }
+      } else if (event === 'INITIAL_SESSION' && !session) {
+        // No session on initial load
+        setLoading(false);
       } else if (event === 'SIGNED_OUT') {
         clearUser();
       } else if (event === 'TOKEN_REFRESHED') {
         console.log('Token refreshed successfully');
+        // Don't change loading state on token refresh
       } else if (event === 'USER_UPDATED' && session?.user) {
         // Refetch profile when user is updated
         try {
