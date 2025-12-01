@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 
 // Web Speech API types
 interface SpeechRecognition extends EventTarget {
@@ -64,6 +64,15 @@ export const useSpeechRecognition = () => {
       return;
     }
 
+    // Stop existing recognition if running
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.abort();
+      } catch (error) {
+        // Ignore errors
+      }
+    }
+
     try {
       const SpeechRecognitionAPI =
         window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -110,6 +119,19 @@ export const useSpeechRecognition = () => {
   const resetTranscript = useCallback(() => {
     setTranscript('');
     setError(null);
+  }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.abort();
+        } catch (error) {
+          // Ignore errors when aborting
+        }
+      }
+    };
   }, []);
 
   return {
