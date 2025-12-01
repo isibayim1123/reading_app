@@ -16,19 +16,23 @@ export const useAuth = () => {
 
         if (session?.user) {
           // Fetch user profile
-          const { data: profile } = await supabase
+          const { data: profile, error: profileError } = await supabase
             .from('profiles')
             .select('*')
             .eq('id', session.user.id)
             .single();
 
+          if (profileError) {
+            console.error('Error fetching profile on init:', profileError);
+          }
+
           if (profile) {
             setUser(profile as Profile);
+          } else {
+            console.warn('User session exists but no profile found');
           }
-          setLoading(false);
-        } else {
-          setLoading(false);
         }
+        setLoading(false);
       } catch (error) {
         console.error('Error initializing auth:', error);
         setLoading(false);
@@ -42,17 +46,26 @@ export const useAuth = () => {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session?.user) {
-        // Fetch user profile
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
+        try {
+          // Fetch user profile
+          const { data: profile, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
 
-        if (profile) {
-          setUser(profile as Profile);
+          if (error) {
+            console.error('Error fetching profile:', error);
+          }
+
+          if (profile) {
+            setUser(profile as Profile);
+          }
+        } catch (error) {
+          console.error('Error in auth state change:', error);
+        } finally {
+          setLoading(false);
         }
-        setLoading(false);
       } else if (event === 'SIGNED_OUT') {
         clearUser();
       }
@@ -61,7 +74,9 @@ export const useAuth = () => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [setUser, setLoading, clearUser]);
+    // Zustand store functions are stable and don't need to be in dependencies
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const signIn = async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({
