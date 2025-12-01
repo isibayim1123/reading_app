@@ -31,9 +31,6 @@ const cleanupOldStorageKeys = () => {
     console.log('Removing old storage key:', key);
     localStorage.removeItem(key);
   });
-
-  // Also clean up any hanging session storage
-  sessionStorage.clear();
 };
 
 const theme = createTheme({
