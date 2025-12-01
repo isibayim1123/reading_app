@@ -45,6 +45,8 @@ export const useAuth = () => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth state changed:', event);
+
       if (event === 'SIGNED_IN' && session?.user) {
         try {
           // Fetch user profile
@@ -68,6 +70,23 @@ export const useAuth = () => {
         }
       } else if (event === 'SIGNED_OUT') {
         clearUser();
+      } else if (event === 'TOKEN_REFRESHED') {
+        console.log('Token refreshed successfully');
+      } else if (event === 'USER_UPDATED' && session?.user) {
+        // Refetch profile when user is updated
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+
+          if (profile) {
+            setUser(profile as Profile);
+          }
+        } catch (error) {
+          console.error('Error updating user profile:', error);
+        }
       }
     });
 
