@@ -54,6 +54,7 @@ export const useSpeechRecognition = () => {
   const [error, setError] = useState<string | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const finalTranscriptRef = useRef('');
+  const lastInterimTranscriptRef = useRef(''); // 最後の暫定結果を保持
 
   const isSupported = useCallback(() => {
     return 'SpeechRecognition' in window || 'webkitSpeechRecognition' in window;
@@ -77,6 +78,7 @@ export const useSpeechRecognition = () => {
 
     // Reset final transcript
     finalTranscriptRef.current = '';
+    lastInterimTranscriptRef.current = '';
 
     try {
       const SpeechRecognitionAPI =
@@ -103,6 +105,9 @@ export const useSpeechRecognition = () => {
             }
           }
         }
+
+        // 最後の暫定結果を保存
+        lastInterimTranscriptRef.current = interimTranscript;
 
         // 確定部分 + 暫定部分を表示
         const fullTranscript = (finalTranscriptRef.current + interimTranscript).trim();
@@ -135,6 +140,14 @@ export const useSpeechRecognition = () => {
   const stopListening = useCallback(() => {
     if (recognitionRef.current) {
       try {
+        // 停止前に最後の暫定結果を確定結果に追加
+        if (lastInterimTranscriptRef.current) {
+          finalTranscriptRef.current += lastInterimTranscriptRef.current + ' ';
+          const finalText = finalTranscriptRef.current.trim();
+          setTranscript(finalText);
+          lastInterimTranscriptRef.current = '';
+        }
+
         recognitionRef.current.stop();
       } catch (error) {
         console.error('Error stopping recognition:', error);
@@ -148,6 +161,7 @@ export const useSpeechRecognition = () => {
     setTranscript('');
     setError(null);
     finalTranscriptRef.current = '';
+    lastInterimTranscriptRef.current = '';
   }, []);
 
   // Cleanup on unmount
