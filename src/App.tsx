@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -12,27 +11,6 @@ import { ContentsPage } from '@/pages/ContentsPage';
 import { PracticePage } from '@/pages/PracticePage';
 import { HistoryPage } from '@/pages/HistoryPage';
 
-// Cleanup old storage keys on app startup
-const cleanupOldStorageKeys = () => {
-  const currentStorageKey = 'reading-app-auth';
-
-  // Get all localStorage keys
-  const keysToRemove: string[] = [];
-
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key && key.startsWith('sb-') && !key.startsWith(currentStorageKey)) {
-      keysToRemove.push(key);
-    }
-  }
-
-  // Remove old Supabase keys
-  keysToRemove.forEach(key => {
-    console.log('Removing old storage key:', key);
-    localStorage.removeItem(key);
-  });
-};
-
 const theme = createTheme({
   palette: {
     primary: {
@@ -45,11 +23,6 @@ const theme = createTheme({
 });
 
 function App() {
-  // Cleanup old storage keys on mount
-  useEffect(() => {
-    cleanupOldStorageKeys();
-  }, []);
-
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
