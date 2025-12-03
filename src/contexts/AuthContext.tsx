@@ -16,16 +16,15 @@ interface AuthProviderProps {
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const { setUser, setLoading, clearUser } = useAuthStore();
-  const initRef = useRef(false);
+  const subscriptionRef = useRef<{ unsubscribe: () => void } | null>(null);
   const loadingTimeoutRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
-    // Prevent multiple initializations (protection against React Strict Mode)
-    if (initRef.current) {
+    // Prevent multiple initializations - check if subscription already exists
+    if (subscriptionRef.current) {
+      console.log('[Auth] Subscription already exists, skipping setup');
       return;
     }
-
-    initRef.current = true;
 
     // Set a timeout to prevent infinite loading state
     // If loading doesn't complete within 5 seconds, force it to false
@@ -40,6 +39,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      // Store subscription reference
+      subscriptionRef.current = subscription;
       console.log('[Auth] Auth state changed:', event);
 
       // Clear the loading timeout since we received an auth event
@@ -109,7 +110,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       if (loadingTimeoutRef.current) {
         clearTimeout(loadingTimeoutRef.current);
       }
-      subscription.unsubscribe();
+      if (subscriptionRef.current) {
+        subscriptionRef.current.unsubscribe();
+        subscriptionRef.current = null;
+      }
     };
   }, [setUser, setLoading, clearUser]);
 
